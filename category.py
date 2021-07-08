@@ -10,7 +10,7 @@ class Category:
         self.category_name = ""
         self.books = []
     
-    def get_url_category(url):
+    def get_number_of_page(self,url):
         page = requests.get(url)
         if page.ok:
             soup = BeautifulSoup(page.text, "html.parser")
@@ -19,7 +19,13 @@ class Category:
                 resultat = ceil(int(nb_book) / 20)
             else:
                 resultat = 1
-        book_links = []
+        return resultat
+
+
+    def get_url_category(self,url):
+        resultat = get_number_of_page(url)
+        # print(resultat)
+        urls_links = []
         if resultat > 1:
             url1 = url.replace("index.html", "")
             for i in range(1, resultat + 1):
@@ -32,33 +38,29 @@ class Category:
                     for article in articles:
                         a = article.find("a")
                         link = a["href"]
-                        book_links.append("http://books.toscrape.com/" + link)
+                        urls_links.append("http://books.toscrape.com/" + link)
         else:
-            r = requests.get(url)
+            r = requests.get(self,url)
             if r.ok:
                 soup = BeautifulSoup(r.text, "html.parser")
                 articles = soup.findAll("article")
                 for article in articles:
                     a = article.find("a")
                     link = a["href"]
-                    book_links.append("http://books.toscrape.com/" + link)
-    
-                for url in book_links:
-                    book = Book(url)
-                    self.books.append(book)
-       
-    
-    #####################################################################################
-    def get_category_name(url):
+                    urls_links.append("http://books.toscrape.com/" + link)
+        # print(len(links))
+        return links
+
+    def __fill_category_name(self,url):
         url_category_name = url.replace(
             "http://books.toscrape.com/catalogue/category/books/", ""
-        )
+            )
         category_name = re.sub(r"[0-9]+", "", url_category_name)
         self.category_name = category_name.replace("_/index.html", "")
         
 
 
-    def search_image(books, folder_image):
+    def search_image(self,books, folder_image):
         for image in books:
             picture = image["image_url"]
             page = requests.get(picture)
@@ -68,22 +70,22 @@ class Category:
                 f.write(page.content)
 
 
-    def get_book_each_ategory(url):
+    def get_book_each_category(self,url):
         urls_books = []
-        books = []
+        self.books = []
 
-        clean_urls_categorys = cat.get_url_category(url)
+        clean_urls_categorys = get_url_category(self,url)
         for clean_url_category in clean_urls_categorys:
             replace_url = clean_url_category.replace("/../../../", "/catalogue/")
             urls_books.append(replace_url)
             # print(replace_url)
 
-        for url_book in urls_books:
-            book = search_book.get_book(url_book)
-            books.append(book)
+        for url_book in self.urls_books:
+            book = Book(url_book)
+            self.books.append(book)
 
-        category = get_category_name(url)
-        folder_category = Path("./data/", category)
+        category = self.__fill_category_name(url)
+        folder_category = Path("./Data/", category)
         folder_category.mkdir(exist_ok=True, parents=True)
         folder_image = Path(folder_category, "image")
         folder_image.mkdir(exist_ok=True)
@@ -96,8 +98,6 @@ class Category:
             writer = csv.DictWriter(f, delimiter=";", fieldnames=fieldnames)
             writer.writeheader()
             writer.writerows(books)
-            
-    def run_book_scrap(self):
-        for book in self.books:
-            book.scrap()
-            print(book)
+
+category = Category("http://books.toscrape.com/catalogue/category/books/new-adult_20/index.html")
+category.get_book_each_category("http://books.toscrape.com/catalogue/category/books/new-adult_20/index.html")           
