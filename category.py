@@ -1,5 +1,5 @@
 import requests
-from Livre import Book
+from livre import Book
 from bs4 import BeautifulSoup
 from math import *
 import re
@@ -84,11 +84,14 @@ class Category:
             book = Book(url_book)
             self.books.append(book)
     def run(self):
+        compt=0
         for book in self.books:
             book.scrap()
-            print (book)       
+            compt+=1
+            #print (book)
+            print(compt)      
 
         
-category = Category("http://books.toscrape.com/catalogue/category/books/new-adult_20/index.html")
-category.get_book_each_category("http://books.toscrape.com/catalogue/category/books/new-adult_20/index.html")
-category.run()           
+# category = Category("http://books.toscrape.com/catalogue/category/books/new-adult_20/index.html")
+# category.get_book_each_category("http://books.toscrape.com/catalogue/category/books/new-adult_20/index.html")
+# category.run()           
