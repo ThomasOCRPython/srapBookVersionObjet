@@ -2,6 +2,8 @@ import requests
 from Livre import Book
 from bs4 import BeautifulSoup
 from math import *
+import re
+
 
 
 class Category:
@@ -10,7 +12,7 @@ class Category:
         self.category_name = ""
         self.books = []
     
-    def get_number_of_page(self,url):
+    def __get_number_of_page(self,url):
         page = requests.get(url)
         if page.ok:
             soup = BeautifulSoup(page.text, "html.parser")
@@ -23,7 +25,7 @@ class Category:
 
 
     def get_url_category(self,url):
-        resultat = get_number_of_page(url)
+        resultat = self.__get_number_of_page(url)
         # print(resultat)
         urls_links = []
         if resultat > 1:
@@ -40,7 +42,7 @@ class Category:
                         link = a["href"]
                         urls_links.append("http://books.toscrape.com/" + link)
         else:
-            r = requests.get(self,url)
+            r = requests.get(url)
             if r.ok:
                 soup = BeautifulSoup(r.text, "html.parser")
                 articles = soup.findAll("article")
@@ -49,7 +51,7 @@ class Category:
                     link = a["href"]
                     urls_links.append("http://books.toscrape.com/" + link)
         # print(len(links))
-        return links
+        return urls_links
 
     def __fill_category_name(self,url):
         url_category_name = url.replace(
@@ -72,32 +74,21 @@ class Category:
 
     def get_book_each_category(self,url):
         urls_books = []
-        self.books = []
-
-        clean_urls_categorys = get_url_category(self,url)
+        
+        clean_urls_categorys = self.get_url_category(url)
         for clean_url_category in clean_urls_categorys:
             replace_url = clean_url_category.replace("/../../../", "/catalogue/")
             urls_books.append(replace_url)
-            # print(replace_url)
 
-        for url_book in self.urls_books:
+        for url_book in urls_books:
             book = Book(url_book)
             self.books.append(book)
+    def run(self):
+        for book in self.books:
+            book.scrap()
+            print (book)       
 
-        category = self.__fill_category_name(url)
-        folder_category = Path("./Data/", category)
-        folder_category.mkdir(exist_ok=True, parents=True)
-        folder_image = Path(folder_category, "image")
-        folder_image.mkdir(exist_ok=True)
-        file_category = Path(folder_category, category + ".csv")
-
-        search_image(books, folder_image)
-
-        with open(file_category, "w", encoding="utf-8-sig", newline="") as f:
-            fieldnames = books[0].keys()
-            writer = csv.DictWriter(f, delimiter=";", fieldnames=fieldnames)
-            writer.writeheader()
-            writer.writerows(books)
-
+        
 category = Category("http://books.toscrape.com/catalogue/category/books/new-adult_20/index.html")
-category.get_book_each_category("http://books.toscrape.com/catalogue/category/books/new-adult_20/index.html")           
+category.get_book_each_category("http://books.toscrape.com/catalogue/category/books/new-adult_20/index.html")
+category.run()           

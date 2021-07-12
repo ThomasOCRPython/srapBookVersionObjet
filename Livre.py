@@ -16,8 +16,8 @@ class Book:
         self.image_url=""
         self.tax=""
         
-    def scrap(self,url):    
-        book = requests.get(url)        
+    def scrap(self):    
+        book = requests.get(self.url)        
         soup = BeautifulSoup(book.content, "html.parser")
         self.__fill_title(soup) 
         self.__fill_category(soup)
@@ -85,13 +85,12 @@ class Book:
         self.tax = tds[4].text
 
     def __str__(self):
-        output = f"url : {self.url} | title : {self.title} | category : {self.category} | upc : {self.upc} | price_including_tax : {self.price_including_tax} |price_excluding_tax : {self.price_excluding_tax} | number_available : {self.number_available} | description : {self.description} | review_rating : {self.review_rating} | image_url : {self.image_url} | tax : {self.tax} "
+        output = f"url : {self.url} \ntitle : {self.title} \ncategory : {self.category}  \nupc : {self.upc}  \nprice_including_tax : {self.price_including_tax} \nprice_excluding_tax : {self.price_excluding_tax}  \nnumber_available : {self.number_available}  \ndescription : {self.description} \nreview_rating : {self.review_rating}  \nimage_url : {self.image_url}  \ntax : {self.tax} "
         return output
         
         
 
     
-book = Book("http://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html")
+# book = Book("http://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html")
+# book.scrap("http://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html")
 # print(book)
-book.scrap("http://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html")
-print(book)
